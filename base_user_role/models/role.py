@@ -22,6 +22,9 @@ class ResUsersRole(models.Model):
         defaults["category_id"] = (
             self.env.ref("base_user_role.ir_module_category_role").id
         )
+        defaults["category_id"] = self.env.ref(
+            "base_user_role.ir_module_category_role"
+        ).id
 
         return defaults
 
