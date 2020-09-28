@@ -14,6 +14,17 @@ class ResUsersRole(models.Model):
     _inherits = {"res.groups": "group_id"}
     _description = "User role"
 
+    @api.model
+    def default_get(self, fields_list):
+
+        defaults = super(ResUsersRole, self).default_get(fields_list)
+
+        defaults["category_id"] = (
+            self.env.ref("base_user_role.ir_module_category_role").id
+        )
+
+        return defaults
+
     group_id = fields.Many2one(
         comodel_name="res.groups",
         required=True,
@@ -26,12 +37,6 @@ class ResUsersRole(models.Model):
     )
     user_ids = fields.One2many(
         comodel_name="res.users", string="Users list", compute="_compute_user_ids"
-    )
-    group_category_id = fields.Many2one(
-        related="group_id.category_id",
-        default=lambda cls: cls.env.ref("base_user_role.ir_module_category_role").id,
-        string="Associated category",
-        help="Associated group's category",
     )
 
     @api.depends("line_ids.user_id")

@@ -12,6 +12,7 @@
                     <group>
                         <field name="name" />
                         <field name="group_id" required="0" readonly="1" />
+                        <field name="category_id" invisible="1" />
                     </group>
                     <notebook>
                         <page string="Groups">
