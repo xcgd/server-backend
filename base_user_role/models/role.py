@@ -27,7 +27,6 @@ class ResUsersRole(models.Model):
     user_ids = fields.One2many(
         comodel_name="res.users", string="Users list", compute="_compute_user_ids"
     )
-
     group_category_id = fields.Many2one(
         related="group_id.category_id",
         default=lambda cls: cls.env.ref("base_user_role.ir_module_category_role").id,
