@@ -133,9 +133,10 @@ class TestUserRole(TransactionCase):
 
     def test_role_unlink(self):
         # Get role1 groups
-        role1_group_ids = self.role1_id.implied_ids.ids
-        role1_group_ids.append(self.role1_id.group_id.id)
-        role1_group_ids = sorted(set(role1_group_ids))
+        role1_groups = self.role1_id.implied_ids
+        role1_groups |= self.role1_id.group_id
+        role1_group_ids = set(role1_groups.ids)
+        role1_implied_ids = set(role1_groups.implied_ids.ids)
 
         # Configure the user with role1 and role2
         self.user_id.write(
@@ -147,9 +148,13 @@ class TestUserRole(TransactionCase):
             }
         )
         # Remove role2
+
         self.role2_id.unlink()
         user_group_ids = sorted({group.id for group in self.user_id.groups_id})
-        self.assertEqual(user_group_ids, role1_group_ids)
+
+        self.assertEqual(
+            user_group_ids, sorted(role1_group_ids | role1_implied_ids)
+        )
         # Remove role1
         self.role1_id.unlink()
         user_group_ids = sorted({group.id for group in self.user_id.groups_id})
@@ -157,9 +162,10 @@ class TestUserRole(TransactionCase):
 
     def test_role_line_unlink(self):
         # Get role1 groups
-        role1_group_ids = self.role1_id.implied_ids.ids
-        role1_group_ids.append(self.role1_id.group_id.id)
-        role1_group_ids = sorted(set(role1_group_ids))
+        role1_groups = self.role1_id.implied_ids
+        role1_groups |= self.role1_id.group_id
+        role1_group_ids = set(role1_groups.ids)
+        role1_implied_ids = set(role1_groups.implied_ids.ids)
 
         # Configure the user with role1 and role2
         self.user_id.write(
@@ -175,7 +181,9 @@ class TestUserRole(TransactionCase):
             lambda l: l.role_id.id == self.role2_id.id
         ).unlink()
         user_group_ids = sorted({group.id for group in self.user_id.groups_id})
-        self.assertEqual(user_group_ids, role1_group_ids)
+        self.assertEqual(
+            user_group_ids, sorted(role1_group_ids | role1_implied_ids)
+        )
         # Remove role1 from the user
         self.user_id.role_line_ids.filtered(
             lambda l: l.role_id.id == self.role1_id.id
