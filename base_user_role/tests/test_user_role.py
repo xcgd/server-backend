@@ -46,8 +46,33 @@ class TestUserRole(TransactionCase):
             ],
         }
         self.role2_id = self.role_model.create(vals)
+
+        self.env.cr.execute(
+            """SELECT DISTINCT column_name
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE column_name IS NOT NULL and table_name = 'res_company' and
+            is_nullable = 'NO'
+            """
+        )
+        field_list = [
+            tpl[0] for tpl in self.env.cr.fetchall()
+            if tpl[0] not in ["id", "name", "partner_id"]
+        ]
+        res_company_default_values = self.env["res.company"].default_get(
+            field_list
+        )
+        for name in res_company_default_values:
+            field_list.remove(name)
+
+        for field_name in field_list:
+            self.env.cr.execute(
+                "ALTER TABLE res_company ALTER COLUMN " + field_name
+                + " DROP NOT NULL;"
+            )
+
         self.company1 = self.env.ref("base.main_company")
-        self.company2 = self.env["res.company"].create({"name": "company2"})
+        vals = dict({"name": "company2"}, **res_company_default_values)
+        self.company2 = self.env["res.company"].create(vals)
         self.user_id.write(
             {"company_ids": [(4, self.company1.id, 0), (4, self.company2.id, 0)]}
         )
